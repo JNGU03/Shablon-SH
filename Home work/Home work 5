@@ -1,0 +1,87 @@
+public class Main {
+    public static void main(String[] args) {
+       
+        ConfigurationManager configManager = ConfigurationManager.getInstance();
+        
+        configManager.setSetting("app.name", "My Application");
+        configManager.setSetting("app.version", "1.0.0");
+        
+        configManager.saveSettings("config.txt");
+        
+        configManager.loadSettings("config.txt");
+        
+        System.out.println("App Name: " + configManager.getSetting("app.name"));
+        System.out.println("App Version: " + configManager.getSetting("app.version"));
+        
+        ConfigurationManager anotherConfigManager = ConfigurationManager.getInstance();
+        System.out.println("Are both instances the same? " + (configManager == anotherConfigManager));
+    }
+}
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+public class ConfigurationManager {
+    private static ConfigurationManager instance;
+    private static final Object lock = new Object();
+    private Map<String, String> settings;
+
+    // Приватный конструктор
+    private ConfigurationManager() {
+        settings = new HashMap<>();
+    }
+
+
+    public static ConfigurationManager getInstance() {
+        if (instance == null) {
+            synchronized (lock) {
+                if (instance == null) {
+                    instance = new ConfigurationManager();
+                }
+            }
+        }
+        return instance;
+    }
+
+
+    public void loadSettings(String filePath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("=", 2);
+                if (parts.length == 2) {
+                    settings.put(parts[0].trim(), parts[1].trim());
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error loading settings: " + e.getMessage());
+        }
+    }
+
+
+    public void saveSettings(String filePath) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (Map.Entry<String, String> entry : settings.entrySet()) {
+                writer.write(entry.getKey() + "=" + entry.getValue());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error saving settings: " + e.getMessage());
+        }
+    }
+
+
+    public String getSetting(String key) {
+        return settings.get(key);
+    }
+
+
+    public void setSetting(String key, String value) {
+        settings.put(key, value);
+    }
+}
