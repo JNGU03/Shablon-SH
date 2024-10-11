@@ -1,0 +1,198 @@
+import java.util.List;
+public class Main {
+    public static void main(String[] args) {
+
+        Logger logger = Logger.getInstance();
+        logger.loadConfig("loggerConfig.txt");
+
+        Thread thread1 = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                logger.log("Сообщение INFO от потока 1", LogLevel.INFO);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        Thread thread2 = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                logger.log("Сообщение WARNING от потока 2", LogLevel.WARNING);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        Thread thread3 = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                logger.log("Сообщение ERROR от потока 3", LogLevel.ERROR);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+
+
+        try {
+            thread1.join();
+            thread2.join();
+            thread3.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        LogReader logReader = new LogReader("logs.txt");
+        List<String> warningLogs = logReader.readLogs(LogLevel.WARNING);
+        System.out.println("Логи уровня WARNING:");
+        logReader.displayLogs(warningLogs);
+    }
+}
+
+//LogReader//////////////////////////
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class LogReader {
+    private String logFilePath;
+
+    public LogReader(String logFilePath) {
+        this.logFilePath = logFilePath;
+    }
+
+
+    public List<String> readLogs(LogLevel filterLevel) {
+        List<String> filteredLogs = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(logFilePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(filterLevel.name())) {
+                    filteredLogs.add(line);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Ошибка чтения логов: " + e.getMessage());
+        }
+        return filteredLogs;
+    }
+
+
+    public void displayLogs(List<String> logs) {
+        for (String log : logs) {
+            System.out.println(log);
+        }
+    }
+}
+//Logger//////////////////////////
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class Logger {
+    private static Logger instance;
+    private static final Lock lock = new ReentrantLock();
+    private LogLevel currentLogLevel = LogLevel.INFO;
+    private String logFilePath = "logs.txt";
+    private long maxFileSize = 1024 * 1024;
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    private Logger() {}
+
+    public static Logger getInstance() {
+        if (instance == null) {
+            lock.lock();
+            try {
+                if (instance == null) {
+                    instance = new Logger();
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+        return instance;
+    }
+
+
+    public void setLogLevel(LogLevel level) {
+        this.currentLogLevel = level;
+    }
+
+
+    public void setLogFilePath(String path) {
+        this.logFilePath = path;
+    }
+
+
+    public void log(String message, LogLevel level) {
+        if (level.ordinal() >= currentLogLevel.ordinal()) {
+            lock.lock();
+            try {
+                checkLogRotation();
+
+                String timestamp = dateFormat.format(new Date());
+                String logMessage = String.format("%s [%s] %s", timestamp, level, message);
+
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFilePath, true))) {
+                    writer.write(logMessage);
+                    writer.newLine();
+                }
+
+
+                System.out.println(logMessage);
+
+            } catch (IOException e) {
+                System.err.println("Ошибка записи в лог файл: " + e.getMessage());
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
+
+
+    private void checkLogRotation() throws IOException {
+        File logFile = new File(logFilePath);
+        if (logFile.exists() && logFile.length() >= maxFileSize) {
+            String newLogFileName = logFilePath.replace(".txt", "_" + System.currentTimeMillis() + ".txt");
+            logFile.renameTo(new File(newLogFileName));
+        }
+    }
+
+
+    public void loadConfig(String configFilePath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(configFilePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] config = line.split("=");
+                if (config[0].trim().equalsIgnoreCase("logLevel")) {
+                    setLogLevel(LogLevel.valueOf(config[1].trim()));
+                } else if (config[0].trim().equalsIgnoreCase("logFilePath")) {
+                    setLogFilePath(config[1].trim());
+                } else if (config[0].trim().equalsIgnoreCase("maxFileSize")) {
+                    maxFileSize = Long.parseLong(config[1].trim());
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Ошибка при загрузке файла конфигурации: " + e.getMessage());
+        }
+    }
+}
+//Loglevel//////////////////////////
+public enum LogLevel {
+    INFO,
+    WARNING,
+    ERROR
+}
