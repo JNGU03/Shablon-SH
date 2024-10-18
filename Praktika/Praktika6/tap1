@@ -1,0 +1,102 @@
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        TravelBookingContext context = new TravelBookingContext();
+        Scanner scanner = new Scanner(System.in);
+
+
+        System.out.println("Выберите тип транспорта (airplane/train/bus): ");
+        String transportType = scanner.nextLine();
+
+        System.out.println("Введите расстояние (в км): ");
+        double distance = scanner.nextDouble();
+
+        System.out.println("Введите количество пассажиров: ");
+        int passengers = scanner.nextInt();
+        scanner.nextLine(); // Поглощение новой строки
+
+        System.out.println("Выберите класс обслуживания (economy/business): ");
+        String serviceClass = scanner.nextLine();
+
+        System.out.println("Есть ли скидка (true/false): ");
+        boolean hasDiscount = scanner.nextBoolean();
+
+  
+        switch (transportType.toLowerCase()) {
+            case "airplane":
+                context.setStrategy(new AirplaneCostCalculationStrategy());
+                break;
+            case "train":
+                context.setStrategy(new TrainCostCalculationStrategy());
+                break;
+            case "bus":
+                context.setStrategy(new BusCostCalculationStrategy());
+                break;
+            default:
+                System.out.println("Неверный тип транспорта");
+                return;
+        }
+
+
+        try {
+            double totalCost = context.calculateTripCost(distance, passengers, serviceClass, hasDiscount);
+            System.out.println("Общая стоимость поездки: " + totalCost);
+        } catch (IllegalStateException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+    }
+}
+
+/////////////////////
+public class TravelBookingContext {
+    private ICostCalculationStrategy strategy;
+
+
+    public void setStrategy(ICostCalculationStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+
+    public double calculateTripCost(double distance, int passengers, String serviceClass, boolean hasDiscount) {
+        if (strategy == null) {
+            throw new IllegalStateException("Не выбрана стратегия расчета стоимости");
+        }
+        return strategy.calculateCost(distance, passengers, serviceClass, hasDiscount);
+    }
+}
+////////////////////
+public class BusCostCalculationStrategy implements ICostCalculationStrategy {
+    @Override
+    public double calculateCost(double distance, int passengers, String serviceClass, boolean hasDiscount) {
+        double baseCost = distance * 0.1; // Базовая стоимость за километр
+        double serviceMultiplier = serviceClass.equalsIgnoreCase("business") ? 1.2 : 1.0;
+        double discount = hasDiscount ? 0.8 : 1.0; // 20% скидка
+        return baseCost * passengers * serviceMultiplier * discount;
+    }
+}
+/////////////////
+public class TrainCostCalculationStrategy implements ICostCalculationStrategy {
+    @Override
+    public double calculateCost(double distance, int passengers, String serviceClass, boolean hasDiscount) {
+        double baseCost = distance * 0.2; // Базовая стоимость за километр
+        double serviceMultiplier = serviceClass.equalsIgnoreCase("business") ? 1.5 : 1.0;
+        double discount = hasDiscount ? 0.9 : 1.0; // 10% скидка
+        return baseCost * passengers * serviceMultiplier * discount;
+    }
+}
+///////////////
+public class AirplaneCostCalculationStrategy implements ICostCalculationStrategy {
+    @Override
+    public double calculateCost(double distance, int passengers, String serviceClass, boolean hasDiscount) {
+        double baseCost = distance * 0.5; // Базовая стоимость за километр
+        double serviceMultiplier = serviceClass.equalsIgnoreCase("business") ? 2.0 : 1.0;
+        double discount = hasDiscount ? 0.85 : 1.0; // 15% скидка
+        return baseCost * passengers * serviceMultiplier * discount;
+    }
+}
+////////////////
+
+public interface ICostCalculationStrategy {
+    double calculateCost(double distance, int passengers, String serviceClass, boolean hasDiscount);
+}
