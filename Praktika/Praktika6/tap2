@@ -1,0 +1,85 @@
+public class Main {
+    public static void main(String[] args) {
+        StockExchange stockExchange = new StockExchange();
+
+        Trader trader = new Trader();
+        TradingRobot robot = new TradingRobot();
+
+        stockExchange.attach(trader);
+        stockExchange.attach(robot);
+
+        stockExchange.changeStockPrice("AAPL", 150);
+        stockExchange.changeStockPrice("AAPL", 80);
+
+        stockExchange.detach(trader);
+
+        stockExchange.changeStockPrice("AAPL", 120);
+    }
+}
+
+////////////////////////////
+public interface IObserver {
+    void update(String stockSymbol, double price);
+}
+
+//////////////////////////
+public interface ISubject {
+    void attach(IObserver observer);
+    void detach(IObserver observer);
+    void notifyObservers(String stockSymbol, double price);
+}
+
+///////////////////////
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class StockExchange implements ISubject {
+    private final List<IObserver> observers = new ArrayList<>();
+
+
+    @Override
+    public void attach(IObserver observer) {
+        observers.add(observer);
+        System.out.println("Наблюдатель добавлен.");
+    }
+
+
+    @Override
+    public void detach(IObserver observer) {
+        observers.remove(observer);
+        System.out.println("Наблюдатель удален.");
+    }
+
+
+    @Override
+    public void notifyObservers(String stockSymbol, double price) {
+        for (IObserver observer : observers) {
+            observer.update(stockSymbol, price);
+        }
+    }
+
+
+    public void changeStockPrice(String stockSymbol, double newPrice) {
+        System.out.println("Изменение цены " + stockSymbol + " на " + newPrice);
+        notifyObservers(stockSymbol, newPrice);
+    }
+}
+////////////////////
+
+public class Trader implements IObserver {
+    @Override
+    public void update(String stockSymbol, double price) {
+        System.out.println("Трейдер: Цена акции " + stockSymbol + " изменилась на " + price + ".");
+    }
+}
+
+
+//////////////////////
+
+public class TradingRobot implements IObserver {
+    @Override
+    public void update(String stockSymbol, double price) {
+        System.out.println("Робот: Цена акции " + stockSymbol + " изменена на " + price + ".");
+    }
+}
