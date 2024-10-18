@@ -1,0 +1,102 @@
+
+import java.util.List;
+import java.util.ArrayList;
+interface IObserver {
+    void update(String currency, double rate);
+}
+
+
+interface ISubject {
+    void registerObserver(IObserver observer);
+    void removeObserver(IObserver observer);
+    void notifyObservers();
+}
+
+class CurrencyExchange implements ISubject {
+    private String currency;
+    private double rate;
+    private List<IObserver> observers;
+
+    public CurrencyExchange() {
+        observers = new ArrayList<>();
+    }
+
+    public void setRate(String currency, double rate) {
+        this.currency = currency;
+        this.rate = rate;
+        notifyObservers();
+    }
+
+    @Override
+    public void registerObserver(IObserver observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(IObserver observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (IObserver observer : observers) {
+            observer.update(currency, rate);
+        }
+    }
+}
+
+
+class TradingApp implements IObserver {
+    private String name;
+
+    public TradingApp(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void update(String currency, double rate) {
+        System.out.println(name + " получил обновление: Курс " + currency + " теперь " + rate);
+    }
+}
+
+
+class FinancialNews implements IObserver {
+    @Override
+    public void update(String currency, double rate) {
+        System.out.println("Финансовая газета: Курс " + currency + " изменился на " + rate);
+    }
+}
+
+class MobileApp implements IObserver {
+    @Override
+    public void update(String currency, double rate) {
+        System.out.println("Мобильное приложение: Курс " + currency + " теперь " + rate);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+     
+        CurrencyExchange exchange = new CurrencyExchange();
+
+   
+        IObserver tradingApp = new TradingApp("Торговое приложение");
+        IObserver newsApp = new FinancialNews();
+        IObserver mobileApp = new MobileApp();
+
+        
+        exchange.registerObserver(tradingApp);
+        exchange.registerObserver(newsApp);
+        exchange.registerObserver(mobileApp);
+
+      
+        exchange.setRate("USD", 76.25);
+        exchange.setRate("EUR", 89.50);
+
+   
+        exchange.removeObserver(newsApp);
+
+      
+        exchange.setRate("GBP", 105.75);
+    }
+}
