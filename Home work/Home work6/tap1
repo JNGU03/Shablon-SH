@@ -1,0 +1,126 @@
+import java.util.Scanner;
+
+
+interface IPaymentStrategy {
+    void pay(double amount);
+}
+
+
+class CreditCardPaymentStrategy implements IPaymentStrategy {
+    private String cardNumber;
+
+    public CreditCardPaymentStrategy(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
+    @Override
+    public void pay(double amount) {
+        System.out.println("Оплата " + amount + " теңге с помощью банковской карты: " + cardNumber);
+    }
+}
+
+
+class PayPalPaymentStrategy implements IPaymentStrategy {
+    private String email;
+
+    public PayPalPaymentStrategy(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public void pay(double amount) {
+        System.out.println("Оплата " + amount + " теңге через PayPal на email: " + email);
+    }
+}
+
+
+class CryptoPaymentStrategy implements IPaymentStrategy {
+    private String walletAddress;
+
+    public CryptoPaymentStrategy(String walletAddress) {
+        this.walletAddress = walletAddress;
+    }
+
+    @Override
+    public void pay(double amount) {
+        System.out.println("Оплата " + amount + " теңге криптовалютой на кошелек: " + walletAddress);
+    }
+}
+
+
+class PaymentContext {
+    private IPaymentStrategy paymentStrategy;
+
+
+    public void setPaymentStrategy(IPaymentStrategy paymentStrategy) {
+        this.paymentStrategy = paymentStrategy;
+    }
+
+
+    public void executePayment(double amount) {
+        if (paymentStrategy != null) {
+            paymentStrategy.pay(amount);
+        } else {
+            System.out.println("Стратегия оплаты не выбрана.");
+        }
+    }
+}
+
+
+public class Main {
+
+    public static void main(String[] args) {
+        // Создаем контекст для оплаты
+        PaymentContext context = new PaymentContext();
+        Scanner scanner = new Scanner(System.in);
+
+
+        double amount = getAmountFromUser(scanner);
+
+
+        int choice = getPaymentChoice(scanner);
+
+
+        setPaymentStrategy(context, choice, scanner);
+
+
+        context.executePayment(amount);
+    }
+
+
+    private static double getAmountFromUser(Scanner scanner) {
+        System.out.println("Введите сумму для оплаты:");
+        return scanner.nextDouble();
+    }
+
+
+    private static int getPaymentChoice(Scanner scanner) {
+        System.out.println("Выберите метод оплаты: 1 - Банковская карта, 2 - PayPal, 3 - Криптовалюта");
+        return scanner.nextInt();
+    }
+
+    
+    private static void setPaymentStrategy(PaymentContext context, int choice, Scanner scanner) {
+        scanner.nextLine(); // Пропуск новой строки после nextInt
+
+        switch (choice) {
+            case 1:
+                System.out.println("Введите номер карты:");
+                String cardNumber = scanner.nextLine();
+                context.setPaymentStrategy(new CreditCardPaymentStrategy(cardNumber));
+                break;
+            case 2:
+                System.out.println("Введите ваш email для PayPal:");
+                String email = scanner.nextLine();
+                context.setPaymentStrategy(new PayPalPaymentStrategy(email));
+                break;
+            case 3:
+                System.out.println("Введите адрес кошелька для оплаты криптовалютой:");
+                String walletAddress = scanner.nextLine();
+                context.setPaymentStrategy(new CryptoPaymentStrategy(walletAddress));
+                break;
+            default:
+                System.out.println("Некорректный выбор метода оплаты.");
+        }
+    }
+}
