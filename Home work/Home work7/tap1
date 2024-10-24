@@ -1,0 +1,232 @@
+package Tap;
+
+public class Main {
+    public static void main(String[] args) {
+        Light light = new Light();
+        Door door = new Door();
+        Thermostat thermostat = new Thermostat();
+
+        ICommand lightOn = new LightOnCommand(light);
+        ICommand lightOff = new LightOffCommand(light);
+        ICommand doorOpen = new DoorOpenCommand(door);
+        ICommand doorClose = new DoorCloseCommand(door);
+        ICommand thermostatIncrease = new ThermostatIncreaseCommand(thermostat);
+        ICommand thermostatDecrease = new ThermostatDecreaseCommand(thermostat);
+
+        CommandInvoker invoker = new CommandInvoker();
+
+        invoker.executeCommand(lightOn);
+        invoker.executeCommand(doorOpen);
+        invoker.executeCommand(thermostatIncrease);
+
+        System.out.println("---- Отмена последней команды ----");
+        invoker.undoLastCommand();
+
+        System.out.println("---- Выполнение команды выключения света ----");
+        invoker.executeCommand(lightOff);
+    }
+}
+
+package Tap;
+
+public class Thermostat {
+    private int temperature;
+
+    public void setTemperature(int temperature) {
+        this.temperature = temperature;
+        System.out.println("Температура установлена на " + temperature + " градусов.");
+    }
+
+    public void increaseTemperature() {
+        temperature++;
+        System.out.println("Температура увеличена на 1 градус. Текущая температура: " + temperature + " градусов.");
+    }
+
+    public void decreaseTemperature() {
+        temperature--;
+        System.out.println("Температура уменьшена на 1 градус. Текущая температура: " + temperature + " градусов.");
+    }
+}
+
+package Tap;
+
+public class ThermostatDecreaseCommand implements ICommand {
+    private Thermostat thermostat;
+
+    public ThermostatDecreaseCommand(Thermostat thermostat) {
+        this.thermostat = thermostat;
+    }
+
+    @Override
+    public void execute() {
+        thermostat.decreaseTemperature();
+    }
+
+    @Override
+    public void undo() {
+        thermostat.increaseTemperature();
+    }
+}
+
+package Tap;
+
+public class ThermostatIncreaseCommand implements ICommand {
+    private Thermostat thermostat;
+
+    public ThermostatIncreaseCommand(Thermostat thermostat) {
+        this.thermostat = thermostat;
+    }
+
+    @Override
+    public void execute() {
+        thermostat.increaseTemperature();
+    }
+
+    @Override
+    public void undo() {
+        thermostat.decreaseTemperature();
+    }
+}
+
+package Tap;
+
+public class LightOnCommand implements ICommand {
+    private Light light;
+
+    public LightOnCommand(Light light) {
+        this.light = light;
+    }
+
+    @Override
+    public void execute() {
+        light.turnOn();
+    }
+
+    @Override
+    public void undo() {
+        light.turnOff();
+    }
+}
+
+package Tap;
+
+public class LightOffCommand implements ICommand {
+    private Light light;
+
+    public LightOffCommand(Light light) {
+        this.light = light;
+    }
+
+    @Override
+    public void execute() {
+        light.turnOff();
+    }
+
+    @Override
+    public void undo() {
+        light.turnOn();
+    }
+}
+
+package Tap;
+
+public class Light {
+    private boolean isOn;
+
+    public void turnOn() {
+        isOn = true;
+        System.out.println("Свет включен.");
+    }
+
+    public void turnOff() {
+        isOn = false;
+        System.out.println("Свет выключен.");
+    }
+}
+
+package Tap;
+
+public interface ICommand {
+    void execute();
+    void undo();
+}
+
+package Tap;
+
+public class DoorOpenCommand implements ICommand {
+    private Door door;
+
+    public DoorOpenCommand(Door door) {
+        this.door = door;
+    }
+
+    @Override
+    public void execute() {
+        door.open();
+    }
+
+    @Override
+    public void undo() {
+        door.close();
+    }
+}
+
+
+package Tap;
+
+public class DoorCloseCommand implements ICommand {
+    private Door door;
+
+    public DoorCloseCommand(Door door) {
+        this.door = door;
+    }
+
+    @Override
+    public void execute() {
+        door.close();
+    }
+
+    @Override
+    public void undo() {
+        door.open();
+    }
+}
+
+package Tap;
+
+public class Door {
+    private boolean isOpen;
+
+    public void open() {
+        isOpen = true;
+        System.out.println("Дверь открыта.");
+    }
+
+    public void close() {
+        isOpen = false;
+        System.out.println("Дверь закрыта.");
+    }
+}
+
+package Tap;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class CommandInvoker {
+    private List<ICommand> commandHistory = new ArrayList<>();
+
+    public void executeCommand(ICommand command) {
+        command.execute();
+        commandHistory.add(command);
+    }
+
+    public void undoLastCommand() {
+        if (!commandHistory.isEmpty()) {
+            ICommand lastCommand = commandHistory.remove(commandHistory.size() - 1);
+            lastCommand.undo();
+        } else {
+            System.out.println("Нет команд для отмены.");
+        }
+    }
+}
