@@ -1,0 +1,280 @@
+package Tap;
+
+public class SmartHomeClient {
+    public static void main(String[] args) {
+        
+        Light light = new Light();
+        AirConditioner airConditioner = new AirConditioner();
+        Television television = new Television();
+
+
+        ICommand lightOn = new LightOnCommand(light);
+        ICommand lightOff = new LightOffCommand(light);
+        ICommand airConditionerOn = new AirConditionerOnCommand(airConditioner);
+        ICommand airConditionerOff = new AirConditionerOffCommand(airConditioner);
+        ICommand televisionOn = new TelevisionOnCommand(television);
+        ICommand televisionOff = new TelevisionOffCommand(television);
+
+
+        RemoteControl remoteControl = new RemoteControl();
+
+
+        remoteControl.setCommand("1", lightOn);
+        remoteControl.setCommand("2", lightOff);
+        remoteControl.setCommand("3", airConditionerOn);
+        remoteControl.setCommand("4", airConditionerOff);
+        remoteControl.setCommand("5", televisionOn);
+        remoteControl.setCommand("6", televisionOff);
+
+
+        remoteControl.pressButton("1");
+        remoteControl.pressButton("3");
+        remoteControl.pressButton("5");
+
+
+        remoteControl.undoLastCommand();
+
+       
+        MacroCommand macroCommand = new MacroCommand();
+        macroCommand.addCommand(lightOn);
+        macroCommand.addCommand(airConditionerOn);
+        macroCommand.addCommand(televisionOn);
+        
+        remoteControl.setCommand("macro", macroCommand);
+        
+        remoteControl.pressButton("macro");
+
+        remoteControl.undoLastCommand();
+
+        remoteControl.pressButton("7");
+    }
+}
+
+package Tap;
+
+public class Television {
+    public void on() {
+        System.out.println("Телевизор включен");
+    }
+
+    public void off() {
+        System.out.println("Телевизор выключен");
+    }
+}
+
+package Tap;
+
+public class TelevisionOffCommand implements ICommand {
+    private Television television;
+
+    public TelevisionOffCommand(Television television) {
+        this.television = television;
+    }
+
+    @Override
+    public void execute() {
+        television.off();
+    }
+
+    @Override
+    public void undo() {
+        television.on();
+    }
+}
+
+package Tap;
+
+public class TelevisionOnCommand implements ICommand {
+    private Television television;
+
+    public TelevisionOnCommand(Television television) {
+        this.television = television;
+    }
+
+    @Override
+    public void execute() {
+        television.on();
+    }
+
+    @Override
+    public void undo() {
+        television.off();
+    }
+}
+
+package Tap;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
+
+public class RemoteControl {
+    private Map<String, ICommand> commands = new HashMap<>();
+    private Stack<ICommand> commandHistory = new Stack<>();
+
+    public void setCommand(String slot, ICommand command) {
+        commands.put(slot, command);
+    }
+
+    public void pressButton(String slot) {
+        ICommand command = commands.get(slot);
+        if (command != null) {
+            command.execute();
+            commandHistory.push(command);
+        } else {
+            System.out.println("Команда для слота \"" + slot + "\" не назначена.");
+        }
+    }
+
+    public void undoLastCommand() {
+        if (!commandHistory.isEmpty()) {
+            ICommand command = commandHistory.pop();
+            command.undo();
+        } else {
+            System.out.println("Нет команд для отмены.");
+        }
+    }
+}
+
+package Tap;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MacroCommand implements ICommand {
+    private List<ICommand> commands;
+
+    public MacroCommand() {
+        commands = new ArrayList<>();
+    }
+
+    public void addCommand(ICommand command) {
+        commands.add(command);
+    }
+
+    @Override
+    public void execute() {
+        for (ICommand command : commands) {
+            command.execute();
+        }
+    }
+
+    @Override
+    public void undo() {
+        for (ICommand command : commands) {
+            command.undo();
+        }
+    }
+}
+
+package Tap;
+
+public class LightOnCommand implements ICommand {
+    private Light light;
+
+    public LightOnCommand(Light light) {
+        this.light = light;
+    }
+
+    @Override
+    public void execute() {
+        light.on();
+    }
+
+    @Override
+    public void undo() {
+        light.off();
+    }
+}
+
+package Tap;
+
+public class LightOffCommand implements ICommand {
+    private Light light;
+
+    public LightOffCommand(Light light) {
+        this.light = light;
+    }
+
+    @Override
+    public void execute() {
+        light.off();
+    }
+
+    @Override
+    public void undo() {
+        light.on();
+    }
+}
+
+package Tap;
+
+public class Light {
+    public void on() {
+        System.out.println("Свет включен");
+    }
+
+    public void off() {
+        System.out.println("Свет выключен");
+    }
+}
+
+package Tap;
+
+public interface ICommand {
+    void execute();
+    void undo();
+}
+
+package Tap;
+
+
+public class AirConditionerOnCommand implements ICommand {
+    private AirConditioner airConditioner;
+
+    public AirConditionerOnCommand(AirConditioner airConditioner) {
+        this.airConditioner = airConditioner;
+    }
+
+    @Override
+    public void execute() {
+        airConditioner.on();
+    }
+
+    @Override
+    public void undo() {
+        airConditioner.off();
+    }
+}
+
+package Tap;
+
+public class AirConditionerOffCommand implements ICommand {
+    private AirConditioner airConditioner;
+
+    public AirConditionerOffCommand(AirConditioner airConditioner) {
+        this.airConditioner = airConditioner;
+    }
+
+    @Override
+    public void execute() {
+        airConditioner.off();
+    }
+
+    @Override
+    public void undo() {
+        airConditioner.on();
+    }
+}
+
+package Tap;
+
+public class AirConditioner {
+    public void on() {
+        System.out.println("Кондиционер включен");
+    }
+
+    public void off() {
+        System.out.println("Кондиционер выключен");
+    }
+}
