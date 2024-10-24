@@ -1,0 +1,130 @@
+package Tap2;
+
+public class ReportClient {
+    public static void main(String[] args) {
+        ReportGenerator pdfReport = new PdfReport();
+        pdfReport.generateReport();
+
+        System.out.println();
+
+        ReportGenerator excelReport = new ExcelReport();
+        excelReport.generateReport();
+
+        System.out.println();
+
+        ReportGenerator htmlReport = new HtmlReport();
+        htmlReport.generateReport();
+    }
+}
+
+package Tap2;
+
+public abstract class ReportGenerator {
+
+    // Шаблонный метод
+    public final void generateReport() {
+        gatherData();
+        formatData();
+        createHeader();
+        saveReport();
+        if (customerWantsEmail()) {
+            sendEmail();
+        }
+    }
+
+    protected abstract void gatherData();
+
+    protected abstract void formatData();
+
+    protected abstract void createHeader();
+
+    protected abstract void saveReport();
+
+    protected boolean customerWantsEmail() {
+        return true; // По умолчанию отправка электронной почты включена
+    }
+
+    private void sendEmail() {
+        System.out.println("Отправка отчета по электронной почте.");
+    }
+}
+
+package Tap2;
+
+public class PdfReport extends ReportGenerator {
+
+    @Override
+    protected void gatherData() {
+        System.out.println("Сбор данных для PDF отчета.");
+    }
+
+    @Override
+    protected void formatData() {
+        System.out.println("Форматирование данных для PDF.");
+    }
+
+    @Override
+    protected void createHeader() {
+        System.out.println("Создание заголовка для PDF отчета.");
+    }
+
+    @Override
+    protected void saveReport() {
+        System.out.println("Сохранение PDF отчета.");
+    }
+}
+
+package Tap2;
+
+public class HtmlReport extends ReportGenerator {
+
+    @Override
+    protected void gatherData() {
+        System.out.println("Сбор данных для HTML отчета.");
+    }
+
+    @Override
+    protected void formatData() {
+        System.out.println("Форматирование данных для HTML.");
+    }
+
+    @Override
+    protected void createHeader() {
+        System.out.println("Создание заголовка для HTML отчета.");
+    }
+
+    @Override
+    protected void saveReport() {
+        System.out.println("Сохранение HTML отчета.");
+    }
+}
+
+package Tap2;
+
+public class ExcelReport extends ReportGenerator {
+
+    @Override
+    protected void gatherData() {
+        System.out.println("Сбор данных для Excel отчета.");
+    }
+
+    @Override
+    protected void formatData() {
+        System.out.println("Форматирование данных для Excel.");
+    }
+
+    @Override
+    protected void createHeader() {
+        System.out.println("Создание заголовка для Excel отчета.");
+    }
+
+    @Override
+    protected void saveReport() {
+        System.out.println("Сохранение Excel отчета.");
+    }
+
+    @Override
+    protected boolean customerWantsEmail() {
+        return false; // Для Excel отчета по умолчанию отправка отключена
+    }
+}
