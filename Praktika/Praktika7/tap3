@@ -1,0 +1,110 @@
+package Tap3;
+
+public class Main {
+    public static void main(String[] args) {
+        ChatMediator mediator = new ChatMediator();
+
+        User alice = new User(mediator, "Алиса");
+        User bob = new User(mediator, "Боб");
+        User charlie = new User(mediator, "Чарли");
+
+        mediator.addUser(alice, "Канал 1");
+        mediator.addUser(bob, "Канал 1");
+        mediator.addUser(charlie, "Канал 2");
+
+        alice.sendMessage("Привет, Боб!", "Канал 1");
+        bob.sendMessage("Привет, Алиса!", "Канал 1");
+        charlie.sendMessage("Привет всем из Канала 2!", "Канал 2");
+
+        mediator.removeUser(bob, "Канал 1");
+        alice.sendMessage("Боб, ты где?", "Канал 1");
+    }
+}
+
+package Tap3;
+
+public class User implements IUser {
+    private String name;
+    private IMediator mediator;
+
+    public User(IMediator mediator, String name) {
+        this.mediator = mediator;
+        this.name = name;
+    }
+
+    @Override
+    public void sendMessage(String message, String channel) {
+        System.out.println(name + " отправляет сообщение: " + message);
+        mediator.sendMessage(message, this, channel);
+    }
+
+    @Override
+    public void receiveMessage(String message) {
+        System.out.println(name + " получил сообщение: " + message);
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+}
+
+package Tap3;
+
+public interface IUser {
+    void sendMessage(String message, String channel);
+    void receiveMessage(String message);
+    String getName();
+}
+
+package Tap3;
+
+public interface IMediator {
+    void sendMessage(String message, IUser sender, String channel);
+    void addUser(IUser user, String channel);
+    void removeUser(IUser user, String channel);
+}
+
+package Tap3;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class ChatMediator implements IMediator {
+    private Map<String, List<IUser>> channels;
+
+    public ChatMediator() {
+        channels = new HashMap<>();
+    }
+
+    @Override
+    public void sendMessage(String message, IUser sender, String channel) {
+        List<IUser> users = channels.get(channel);
+        if (users != null) {
+            for (IUser user : users) {
+                if (user != sender) {
+                    user.receiveMessage(message);
+                }
+            }
+        } else {
+            System.out.println("Канал не существует.");
+        }
+    }
+
+    @Override
+    public void addUser(IUser user, String channel) {
+        channels.computeIfAbsent(channel, k -> new ArrayList<>()).add(user);
+        System.out.println(user.getName() + " присоединился к каналу: " + channel);
+    }
+
+    @Override
+    public void removeUser(IUser user, String channel) {
+        List<IUser> users = channels.get(channel);
+        if (users != null) {
+            users.remove(user);
+            System.out.println(user.getName() + " покинул канал: " + channel);
+        }
+    }
+}
