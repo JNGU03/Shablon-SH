@@ -1,0 +1,134 @@
+package Tap2;
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Приготовление чая:");
+        Beverage tea = new Tea();
+        tea.prepareRecipe();
+
+        System.out.println();
+
+        System.out.println("Приготовление кофе:");
+        Beverage coffee = new Coffee();
+        coffee.prepareRecipe();
+    }
+}
+
+package Tap2;
+
+import java.util.Scanner;
+
+public class Tea extends Beverage {
+    @Override
+    protected void brew() {
+        System.out.println("Заваривание чая...");
+    }
+
+    @Override
+    protected void addCondiments() {
+        System.out.println("Добавление лимона...");
+    }
+
+    @Override
+    protected boolean customerWantsCondiments() {
+        String answer = getUserInput();
+        return answer.toLowerCase().startsWith("y");
+    }
+
+    private String getUserInput() {
+        System.out.print("Хотите добавить лимон в чай? (y/n): ");
+        Scanner scanner = new Scanner(System.in);
+        return scanner.nextLine();
+    }
+}
+
+package Tap2;
+
+import java.util.Scanner;
+
+public class HotChocolate extends Beverage {
+    @Override
+    protected void brew() {
+        System.out.println("Заваривание горячего шоколада...");
+    }
+
+    @Override
+    protected void addCondiments() {
+        System.out.println("Добавление взбитых сливок...");
+    }
+
+    @Override
+    protected boolean customerWantsCondiments() {
+        String answer = getUserInput();
+        return answer.toLowerCase().startsWith("y");
+    }
+
+    private String getUserInput() {
+        System.out.print("Хотите добавить взбитые сливки в горячий шоколад? (y/n): ");
+        Scanner scanner = new Scanner(System.in);
+        return scanner.nextLine();
+    }
+}
+
+package Tap2;
+
+import java.util.Scanner;
+
+public class Coffee extends Beverage {
+    @Override
+    protected void brew() {
+        System.out.println("Заваривание кофе...");
+    }
+
+    @Override
+    protected void addCondiments() {
+        System.out.println("Добавление сахара и молока...");
+    }
+
+    @Override
+    protected boolean customerWantsCondiments() {
+        String answer = getUserInput();
+        return answer.toLowerCase().startsWith("y");
+    }
+
+    private String getUserInput() {
+        System.out.print("Хотите добавить сахар и молоко в кофе? (y/n): ");
+        Scanner scanner = new Scanner(System.in);
+        return scanner.nextLine();
+    }
+}
+
+package Tap2;
+
+import java.util.Scanner;
+
+public abstract class Beverage {
+ 
+    public final void prepareRecipe() {
+        boilWater();
+        brew();
+        pourInCup();
+        if (customerWantsCondiments()) {
+            addCondiments();
+        }
+    }
+
+ 
+    private void boilWater() {
+        System.out.println("Кипячение воды...");
+    }
+
+
+    private void pourInCup() {
+        System.out.println("Наливание в чашку...");
+    }
+
+   
+    protected abstract void brew();
+    protected abstract void addCondiments();
+
+    
+    protected boolean customerWantsCondiments() {
+        return true; 
+    }
+}
