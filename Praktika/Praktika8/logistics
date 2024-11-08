@@ -1,0 +1,212 @@
+package logistics;
+
+public class DeliveryServiceFactory {
+    public static IInternalDeliveryService getDeliveryService(String serviceType) {
+        switch (serviceType) {
+            case "Internal":
+                return new InternalDeliveryService();
+            case "LogisticsA":
+                return new LogisticsAdapterA();
+            case "LogisticsB":
+                return new LogisticsAdapterB();
+            case "LogisticsC":
+                return new LogisticsAdapterC();
+            default:
+                throw new IllegalArgumentException("Unknown delivery service type: " + serviceType);
+        }
+    }
+}
+
+package logistics;
+
+public class ExternalLogisticsServiceA {
+    public void shipItem(int itemId) {
+        System.out.println("Item " + itemId + " shipped via External Logistics A.");
+    }
+
+    public String trackShipment(int shipmentId) {
+        return "Shipment " + shipmentId + " is in transit via External Logistics A.";
+    }
+
+    public double getShippingCost(int itemId) {
+        return 15.0; // Example cost calculation
+    }
+}
+
+package logistics;
+
+public class ExternalLogisticsServiceB {
+    public void sendPackage(String packageInfo) {
+        System.out.println("Package " + packageInfo + " sent via External Logistics B.");
+    }
+
+    public String checkPackageStatus(String trackingCode) {
+        return "Tracking code " + trackingCode + " is delivered via External Logistics B.";
+    }
+
+    public double getPackageCost(String packageInfo) {
+        return 20.0;
+    }
+}
+
+package logistics;
+
+public class ExternalLogisticsServiceC {
+    public void dispatch(String orderReference) {
+        System.out.println("Order " + orderReference + " dispatched via External Logistics C.");
+    }
+
+    public String getStatus(String orderReference) {
+        return "Order " + orderReference + " has been delivered via External Logistics C.";
+    }
+
+    public double computeCost(String orderReference) {
+        return 25.0;
+    }
+}
+
+package logistics;
+
+public interface IInternalDeliveryService {
+    void deliverOrder(String orderId);
+    String getDeliveryStatus(String orderId);
+    double calculateDeliveryCost(String orderId);
+}
+
+package logistics;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class InternalDeliveryService implements IInternalDeliveryService {
+    private Map<String, String> orderStatus;
+
+    public InternalDeliveryService() {
+        orderStatus = new HashMap<>();
+    }
+
+    @Override
+    public void deliverOrder(String orderId) {
+        orderStatus.put(orderId, "Delivered via Internal Service");
+        System.out.println("Order " + orderId + " delivered by Internal Service.");
+    }
+
+    @Override
+    public String getDeliveryStatus(String orderId) {
+        return orderStatus.getOrDefault(orderId, "Order not found");
+    }
+
+    @Override
+    public double calculateDeliveryCost(String orderId) {
+        return 10.0; // Fixed cost for internal delivery
+    }
+}
+
+package logistics;
+
+public class Logger {
+    public static void log(String message) {
+        System.out.println("[LOG] " + message);
+    }
+}
+
+package logistics;
+
+public class LogisticsAdapterA implements IInternalDeliveryService {
+    private ExternalLogisticsServiceA externalServiceA;
+
+    public LogisticsAdapterA() {
+        externalServiceA = new ExternalLogisticsServiceA();
+    }
+
+    @Override
+    public void deliverOrder(String orderId) {
+        externalServiceA.shipItem(Integer.parseInt(orderId));
+    }
+
+    @Override
+    public String getDeliveryStatus(String orderId) {
+        return externalServiceA.trackShipment(Integer.parseInt(orderId));
+    }
+
+    @Override
+    public double calculateDeliveryCost(String orderId) {
+        return externalServiceA.getShippingCost(Integer.parseInt(orderId));
+    }
+}
+
+package logistics;
+
+public class LogisticsAdapterB implements IInternalDeliveryService {
+    private ExternalLogisticsServiceB externalServiceB;
+
+    public LogisticsAdapterB() {
+        externalServiceB = new ExternalLogisticsServiceB();
+    }
+
+    @Override
+    public void deliverOrder(String orderId) {
+        externalServiceB.sendPackage(orderId);
+    }
+
+    @Override
+    public String getDeliveryStatus(String orderId) {
+        return externalServiceB.checkPackageStatus(orderId);
+    }
+
+    @Override
+    public double calculateDeliveryCost(String orderId) {
+        return externalServiceB.getPackageCost(orderId);
+    }
+}
+
+package logistics;
+
+public class LogisticsAdapterC implements IInternalDeliveryService {
+    private ExternalLogisticsServiceC externalServiceC;
+
+    public LogisticsAdapterC() {
+        externalServiceC = new ExternalLogisticsServiceC();
+    }
+
+    @Override
+    public void deliverOrder(String orderId) {
+        externalServiceC.dispatch(orderId);
+    }
+
+    @Override
+    public String getDeliveryStatus(String orderId) {
+        return externalServiceC.getStatus(orderId);
+    }
+
+    @Override
+    public double calculateDeliveryCost(String orderId) {
+        return externalServiceC.computeCost(orderId);
+    }
+}
+
+package logistics;
+
+public class LogisticsDemo {
+    public static void main(String[] args) {
+        IInternalDeliveryService internalService = DeliveryServiceFactory.getDeliveryService("Internal");
+        internalService.deliverOrder("101");
+        Logger.log(internalService.getDeliveryStatus("101"));
+        Logger.log("Cost: $" + internalService.calculateDeliveryCost("101"));
+
+        IInternalDeliveryService logisticsA = DeliveryServiceFactory.getDeliveryService("LogisticsA");
+        logisticsA.deliverOrder("202");
+        Logger.log(logisticsA.getDeliveryStatus("202"));
+        Logger.log("Cost: $" + logisticsA.calculateDeliveryCost("202"));
+
+        IInternalDeliveryService logisticsB = DeliveryServiceFactory.getDeliveryService("LogisticsB");
+        logisticsB.deliverOrder("303");
+        Logger.log(logisticsB.getDeliveryStatus("303"));
+        Logger.log("Cost: $" + logisticsB.calculateDeliveryCost("303"));
+
+        IInternalDeliveryService logisticsC = DeliveryServiceFactory.getDeliveryService("LogisticsC");
+        logisticsC.deliverOrder("404");
+        Logger.log(logisticsC.getDeliveryStatus("404"));
+        Logger.log("Cost: $" + logisticsC.calculateDeliveryCost("404"));
+    }
+}
