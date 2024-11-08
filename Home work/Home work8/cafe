@@ -1,0 +1,167 @@
+package cafe;
+
+public interface Beverage {
+    double cost();            
+    String getDescription();  
+}
+
+
+package cafe;
+
+public abstract class BeverageDecorator implements Beverage {
+    protected Beverage beverage;
+
+    public BeverageDecorator(Beverage beverage) {
+        this.beverage = beverage;
+    }
+
+    @Override
+    public double cost() {
+        return beverage.cost(); 
+    }
+
+    @Override
+    public String getDescription() {
+        return beverage.getDescription(); 
+    }
+}
+
+package cafe;
+
+public class CafeOrder {
+    public static void main(String[] args) {
+        
+        Beverage beverage1 = new Espresso();
+        System.out.println(beverage1.getDescription() + " : " + beverage1.cost() + " tg.");
+
+        
+        beverage1 = new Milk(beverage1);
+        beverage1 = new Sugar(beverage1);
+        System.out.println(beverage1.getDescription() + " : " + beverage1.cost() + " tg.");
+
+        
+        Beverage beverage2 = new Tea();
+        beverage2 = new WhippedCream(beverage2);
+        System.out.println(beverage2.getDescription() + " : " + beverage2.cost() + " tg.");
+
+        Beverage beverage3 = new Latte();
+        beverage3 = new Syrup(beverage3);
+        beverage3 = new Milk(beverage3);
+        beverage3 = new WhippedCream(beverage3);
+        System.out.println(beverage3.getDescription() + " : " + beverage3.cost() + " tg.");
+    }
+}
+
+package cafe;
+
+public class Espresso implements Beverage {
+    @Override
+    public double cost() {
+        return 300.0;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Espresso";
+    }
+}
+
+package cafe;
+
+public class Latte implements Beverage {
+    @Override
+    public double cost() {
+        return 500.0; 
+    }
+
+    @Override
+    public String getDescription() {
+        return "Latte";
+    }
+}
+
+package cafe;
+
+public class Milk extends BeverageDecorator {
+    public Milk(Beverage beverage) {
+        super(beverage);
+    }
+
+    @Override
+    public double cost() {
+        return super.cost() + 20.0; 
+    }
+
+    @Override
+    public String getDescription() {
+        return super.getDescription() + ", Milk";
+    }
+}
+
+package cafe;
+
+public class Sugar extends BeverageDecorator {
+    public Sugar(Beverage beverage) {
+        super(beverage);
+    }
+
+    @Override
+    public double cost() {
+        return super.cost() + 5.0; 
+    }
+
+    @Override
+    public String getDescription() {
+        return super.getDescription() + ", Sugar";
+    }
+}
+
+package cafe;
+
+public class Syrup extends BeverageDecorator {
+    public Syrup(Beverage beverage) {
+        super(beverage);
+    }
+
+    @Override
+    public double cost() {
+        return super.cost() + 30.0; 
+    }
+
+    @Override
+    public String getDescription() {
+        return super.getDescription() + ", Syrup";
+    }
+}
+
+package cafe;
+
+public class Tea implements Beverage {
+    @Override
+    public double cost() {
+        return 300.0; 
+    }
+
+    @Override
+    public String getDescription() {
+        return "Tea";
+    }
+}
+
+package cafe;
+
+public class WhippedCream extends BeverageDecorator {
+    public WhippedCream(Beverage beverage) {
+        super(beverage);
+    }
+
+    @Override
+    public double cost() {
+        return super.cost() + 50.0; 
+    }
+
+    @Override
+    public String getDescription() {
+        return super.getDescription() + ", Whipped Cream";
+    }
+}
