@@ -1,0 +1,186 @@
+package report;
+
+public class CsvExportDecorator extends ReportDecorator {
+
+    public CsvExportDecorator(IReport report) {
+        super(report);
+    }
+
+    @Override
+    public String generate() {
+        String originalReport = report.generate();
+        return originalReport.replace("\n", ",") + ".csv";
+    }
+}
+
+package report;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class DateFilterDecorator extends ReportDecorator {
+    private String startDate;
+    private String endDate;
+
+    public DateFilterDecorator(IReport report, String startDate, String endDate) {
+        super(report);
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
+    @Override
+    public String generate() {
+        String originalReport = report.generate();
+        if (report instanceof SalesReport) {
+            List<String> filteredData = ((SalesReport) report).getSalesData().stream()
+                    .filter(record -> record.contains("2024-11-02"))
+                    .collect(Collectors.toList());
+            return "Filtered Sales Report:\n" + String.join("\n", filteredData) + "\n";
+        }
+        return originalReport;
+    }
+}
+
+package report;
+
+public interface IReport {
+    String generate();
+}
+
+package report;
+
+public class PdfExportDecorator extends ReportDecorator {
+
+    public PdfExportDecorator(IReport report) {
+        super(report);
+    }
+
+    @Override
+    public String generate() {
+        String originalReport = report.generate();
+        return originalReport + ".pdf";
+    }
+}
+
+package report;
+
+public abstract class ReportDecorator implements IReport {
+    protected IReport report;
+
+    public ReportDecorator(IReport report) {
+        this.report = report;
+    }
+
+    @Override
+    public String generate() {
+        return report.generate();
+    }
+}
+
+package report;
+
+public class ReportDemo {
+    public static void main(String[] args) {
+        // Генерация базового отчета по продажам
+        IReport salesReport = new SalesReport();
+        System.out.println(salesReport.generate());
+
+        // Применение декоратора для фильтрации
+        IReport filteredReport = new DateFilterDecorator(salesReport, "2024-11-01", "2024-11-02");
+        System.out.println(filteredReport.generate());
+
+        // Применение декоратора для сортировки
+        IReport sortedReport = new SortingDecorator(salesReport);
+        System.out.println(sortedReport.generate());
+
+        // Применение декоратора для экспорта в CSV
+        IReport csvReport = new CsvExportDecorator(sortedReport);
+        System.out.println(csvReport.generate());
+
+        // Применение декоратора для экспорта в PDF
+        IReport pdfReport = new PdfExportDecorator(sortedReport);
+        System.out.println(pdfReport.generate());
+    }
+}
+
+package report;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class SalesReport implements IReport {
+    private List<String> salesData;
+
+    public SalesReport() {
+        salesData = new ArrayList<>();
+        salesData.add("Date: 2024-11-01, Amount: $500");
+        salesData.add("Date: 2024-11-02, Amount: $300");
+        salesData.add("Date: 2024-11-03, Amount: $700");
+    }
+
+    @Override
+    public String generate() {
+        StringBuilder report = new StringBuilder("Sales Report:\n");
+        for (String record : salesData) {
+            report.append(record).append("\n");
+        }
+        return report.toString();
+    }
+
+    public List<String> getSalesData() {
+        return salesData;
+    }
+}
+
+package report;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class SortingDecorator extends ReportDecorator {
+
+    public SortingDecorator(IReport report) {
+        super(report);
+    }
+
+    @Override
+    public String generate() {
+        String originalReport = report.generate();
+        if (report instanceof SalesReport) {
+            List<String> sortedData = ((SalesReport) report).getSalesData().stream()
+                    .sorted()
+                    .collect(Collectors.toList());
+            return "Sorted Sales Report:\n" + String.join("\n", sortedData) + "\n";
+        }
+        return originalReport;
+    }
+}
+
+package report;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class UserReport implements IReport {
+    private List<String> userData;
+
+    public UserReport() {
+        userData = new ArrayList<>();
+        userData.add("User: John Doe, Registered: 2024-11-01");
+        userData.add("User: Jane Smith, Registered: 2024-11-02");
+        userData.add("User: Bob Johnson, Registered: 2024-11-03");
+    }
+
+    @Override
+    public String generate() {
+        StringBuilder report = new StringBuilder("User Report:\n");
+        for (String record : userData) {
+            report.append(record).append("\n");
+        }
+        return report.toString();
+    }
+
+    public List<String> getUserData() {
+        return userData;
+    }
+}
