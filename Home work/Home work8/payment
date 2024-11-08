@@ -1,0 +1,80 @@
+package payment;
+
+public interface IPaymentProcessor {
+    void processPayment(double amount);
+}
+
+package payment;
+
+public class PaymentDemo {
+    public static void main(String[] args) {
+ 
+        IPaymentProcessor paypalProcessor = new PayPalPaymentProcessor();
+        paypalProcessor.processPayment(500000.0);
+
+        StripePaymentService stripeService = new StripePaymentService();
+        IPaymentProcessor stripeAdapter = new StripePaymentAdapter(stripeService);
+        stripeAdapter.processPayment(1000000.0);
+
+        SquarePaymentService squareService = new SquarePaymentService();
+        IPaymentProcessor squareAdapter = new SquarePaymentAdapter(squareService);
+        squareAdapter.processPayment(750000.0);
+    }
+}
+
+package payment;
+
+public class PayPalPaymentProcessor implements IPaymentProcessor {
+    @Override
+    public void processPayment(double amount) {
+        System.out.println("Processing PayPal payment of " + amount + " tg");
+    }
+}
+
+package payment;
+
+public class SquarePaymentAdapter implements IPaymentProcessor {
+    private SquarePaymentService squareService;
+
+    public SquarePaymentAdapter(SquarePaymentService squareService) {
+        this.squareService = squareService;
+    }
+
+    @Override
+    public void processPayment(double amount) {
+       
+        squareService.initiatePayment(amount);
+    }
+}
+
+package payment;
+
+public class SquarePaymentService {
+    public void initiatePayment(double amount) {
+        System.out.println("Processing Square payment of " + amount + " tg");
+    }
+}
+
+package payment;
+
+public class StripePaymentAdapter implements IPaymentProcessor {
+    private StripePaymentService stripeService;
+
+    public StripePaymentAdapter(StripePaymentService stripeService) {
+        this.stripeService = stripeService;
+    }
+
+    @Override
+    public void processPayment(double amount) {
+      
+        stripeService.makeTransaction(amount);
+    }
+}
+
+package payment;
+
+public class StripePaymentService {
+    public void makeTransaction(double totalAmount) {
+        System.out.println("Processing Stripe payment of "+ totalAmount + " tg");
+    }
+}
