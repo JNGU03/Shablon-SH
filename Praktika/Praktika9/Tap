@@ -1,1 +1,108 @@
+public class RoomBookingSystem {
+    public boolean bookRoom(String roomType) {
+        System.out.println("Бронирование номера типа: " + roomType);
+        return true;
+    }
 
+    public boolean cancelBooking(String roomType) {
+        System.out.println("Отмена бронирования номера типа: " + roomType);
+        return true;
+    }
+}
+
+public class RestaurantSystem {
+    public void bookTable(int seats) {
+        System.out.println("Бронирование стола на " + seats + " человек.");
+    }
+
+    public void orderFood(String foodItem) {
+        System.out.println("Заказ блюда: " + foodItem);
+    }
+}
+
+public class EventManagementSystem {
+    public void bookEventHall(String hallName, int attendees) {
+        System.out.println("Бронирование зала: " + hallName + " для " + attendees + " участников.");
+    }
+
+    public void orderEquipment(String equipment) {
+        System.out.println("Заказ оборудования: " + equipment);
+    }
+}
+
+public class CleaningService {
+    public void scheduleCleaning(String roomType) {
+        System.out.println("Расписание уборки для номера типа: " + roomType);
+    }
+
+    public void requestImmediateCleaning(String roomNumber) {
+        System.out.println("Запрос на немедленную уборку номера: " + roomNumber);
+    }
+}
+
+public class HotelFacade {
+    private RoomBookingSystem roomBookingSystem;
+    private RestaurantSystem restaurantSystem;
+    private EventManagementSystem eventManagementSystem;
+    private CleaningService cleaningService;
+
+    public HotelFacade() {
+        this.roomBookingSystem = new RoomBookingSystem();
+        this.restaurantSystem = new RestaurantSystem();
+        this.eventManagementSystem = new EventManagementSystem();
+        this.cleaningService = new CleaningService();
+    }
+
+    public void bookRoomWithServices(String roomType, String foodItem) {
+        System.out.println("Запуск сценария: Бронирование номера с услугами ресторана и уборки");
+        if (roomBookingSystem.bookRoom(roomType)) {
+            restaurantSystem.orderFood(foodItem);
+            cleaningService.scheduleCleaning(roomType);
+        }
+    }
+
+    public void organizeEvent(String hallName, int attendees, String equipment, String roomType) {
+        System.out.println("Запуск сценария: Организация мероприятия");
+        eventManagementSystem.bookEventHall(hallName, attendees);
+        eventManagementSystem.orderEquipment(equipment);
+        roomBookingSystem.bookRoom(roomType);
+    }
+
+    public void bookRestaurantTableWithTaxi(int seats) {
+        System.out.println("Запуск сценария: Бронирование стола в ресторане с вызовом такси");
+        restaurantSystem.bookTable(seats);
+        System.out.println("Вызов такси для гостей.");
+    }
+
+    public void cancelRoomBooking(String roomType) {
+        System.out.println("Отмена бронирования через фасад");
+        roomBookingSystem.cancelBooking(roomType);
+    }
+
+
+    public void requestCleaning(String roomNumber) {
+        System.out.println("Запрос на уборку через фасад");
+        cleaningService.requestImmediateCleaning(roomNumber);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        HotelFacade hotelFacade = new HotelFacade();
+
+        System.out.println("\n--- Сценарий 1: Бронирование номера с рестораном и уборкой ---");
+        hotelFacade.bookRoomWithServices("Люкс", "Паста Карбонара");
+
+        System.out.println("\n--- Сценарий 2: Организация мероприятия ---");
+        hotelFacade.organizeEvent("Конференц-зал А", 50, "Проектор", "Стандарт");
+
+        System.out.println("\n--- Сценарий 3: Бронирование стола в ресторане с вызовом такси ---");
+        hotelFacade.bookRestaurantTableWithTaxi(4);
+
+        System.out.println("\n--- Дополнительно: Отмена бронирования номера ---");
+        hotelFacade.cancelRoomBooking("Люкс");
+
+        System.out.println("\n--- Дополнительно: Запрос на немедленную уборку ---");
+        hotelFacade.requestCleaning("Номер 305");
+    }
+}
