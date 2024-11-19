@@ -1,1 +1,161 @@
+import java.util.ArrayList;
+import java.util.List;
 
+public abstract class OrganizationComponent {
+    protected String name;
+
+    public OrganizationComponent(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void add(OrganizationComponent component) {
+        throw new UnsupportedOperationException("Операция не поддерживается.");
+    }
+
+    public void remove(OrganizationComponent component) {
+        throw new UnsupportedOperationException("Операция не поддерживается.");
+    }
+
+    public abstract void displayStructure(int level);
+    public abstract double calculateBudget();
+    public abstract int countEmployees();
+    public abstract List<String> listAllEmployees();
+}
+
+public class Employee extends OrganizationComponent {
+    private String position;
+    private double salary;
+
+    public Employee(String name, String position, double salary) {
+        super(name);
+        this.position = position;
+        this.salary = salary;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(double salary) {
+        this.salary = salary;
+    }
+
+    @Override
+    public void displayStructure(int level) {
+        System.out.println("  ".repeat(level) + "- " + name + " (" + position + ")");
+    }
+
+    @Override
+    public double calculateBudget() {
+        return salary;
+    }
+
+    @Override
+    public int countEmployees() {
+        return 1;
+    }
+
+    @Override
+    public List<String> listAllEmployees() {
+        List<String> employees = new ArrayList<>();
+        employees.add(name);
+        return employees;
+    }
+}
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Department extends OrganizationComponent {
+    private List<OrganizationComponent> components = new ArrayList<>();
+
+    public Department(String name) {
+        super(name);
+    }
+
+    @Override
+    public void add(OrganizationComponent component) {
+        components.add(component);
+    }
+
+    @Override
+    public void remove(OrganizationComponent component) {
+        components.remove(component);
+    }
+
+    @Override
+    public void displayStructure(int level) {
+        System.out.println("  ".repeat(level) + "+ " + name);
+        for (OrganizationComponent component : components) {
+            component.displayStructure(level + 1);
+        }
+    }
+
+public class Main {
+    public static void main(String[] args) {
+        // Сотрудники
+        Employee john = new Employee("John Doe", "Software Engineer", 120000);
+        Employee jane = new Employee("Jane Smith", "Project Manager", 150000);
+        Employee alice = new Employee("Alice Brown", "Designer", 90000);
+        Employee bob = new Employee("Bob White", "Intern", 40000);
+
+        // Отделы
+        Department development = new Department("Development Department");
+        Department design = new Department("Design Department");
+        Department mainOffice = new Department("Main Office");
+
+        // Формирование структуры
+        development.add(john);
+        development.add(jane);
+        design.add(alice);
+        design.add(bob);
+        mainOffice.add(development);
+        mainOffice.add(design);
+
+        // Вывод структуры организации
+        System.out.println("Структура компании:");
+        mainOffice.displayStructure(0);
+
+        // Расчет общего бюджета и количества сотрудников
+        System.out.println("\nОбщий бюджет: " + mainOffice.calculateBudget());
+        System.out.println("Общее количество сотрудников: " + mainOffice.countEmployees());
+
+        // Список всех сотрудников
+        System.out.println("\nСписок сотрудников:");
+        for (String employee : mainOffice.listAllEmployees()) {
+            System.out.println("- " + employee);
+        }
+    }
+}
+
+    @Override
+    public double calculateBudget() {
+        double totalBudget = 0;
+        for (OrganizationComponent component : components) {
+            totalBudget += component.calculateBudget();
+        }
+        return totalBudget;
+    }
+
+    @Override
+    public int countEmployees() {
+        int totalEmployees = 0;
+        for (OrganizationComponent component : components) {
+            totalEmployees += component.countEmployees();
+        }
+        return totalEmployees;
+    }
+
+    @Override
+    public List<String> listAllEmployees() {
+        List<String> employees = new ArrayList<>();
+        for (OrganizationComponent component : components) {
+            employees.addAll(component.listAllEmployees());
+        }
+        return employees;
+    }
+}
