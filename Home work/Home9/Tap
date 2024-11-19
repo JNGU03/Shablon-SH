@@ -1,1 +1,144 @@
+package Tap;
+
+public class Main {
+    public static void main(String[] args) {
+        TV tv = new TV();
+        AudioSystem audioSystem = new AudioSystem();
+        DVDPlayer dvdPlayer = new DVDPlayer();
+        GameConsole gameConsole = new GameConsole();
+
+        HomeTheaterFacade homeTheater = new HomeTheaterFacade(tv, audioSystem, dvdPlayer, gameConsole);
+
+        System.out.println("=== Сценарий 1: Просмотр фильма ===");
+        homeTheater.watchMovie("Inception");
+
+        System.out.println("\n=== Сценарий 2: Запуск игры ===");
+        homeTheater.playGame("The Legend of Zelda");
+
+        System.out.println("\n=== Сценарий 3: Прослушивание музыки ===");
+        homeTheater.listenToMusic();
+
+        System.out.println("\n=== Сценарий 4: Выключение системы ===");
+        homeTheater.turnOffSystem();
+    }
+}
+
+package Tap;
+
+public class TV {
+    public void turnOn() {
+        System.out.println("Телевизор включен.");
+    }
+
+    public void turnOff() {
+        System.out.println("Телевизор выключен.");
+    }
+
+    public void setChannel(int channel) {
+        System.out.println("Канал установлен на " + channel);
+    }
+}
+
+package Tap;
+
+public class HomeTheaterFacade {
+    private TV tv;
+    private AudioSystem audioSystem;
+    private DVDPlayer dvdPlayer;
+    private GameConsole gameConsole;
+
+    public HomeTheaterFacade(TV tv, AudioSystem audioSystem, DVDPlayer dvdPlayer, GameConsole gameConsole) {
+        this.tv = tv;
+        this.audioSystem = audioSystem;
+        this.dvdPlayer = dvdPlayer;
+        this.gameConsole = gameConsole;
+    }
+
+    public void watchMovie(String movie) {
+        System.out.println("Подготовка к просмотру фильма: " + movie);
+        tv.turnOn();
+        audioSystem.turnOn();
+        audioSystem.setVolume(10);
+        dvdPlayer.turnOn();
+        dvdPlayer.play();
+    }
+
+    public void playGame(String game) {
+        System.out.println("Подготовка к запуску игры: " + game);
+        tv.turnOn();
+        gameConsole.turnOn();
+        gameConsole.launchGame(game);
+    }
+
+    public void listenToMusic() {
+        System.out.println("Подготовка к прослушиванию музыки.");
+        tv.turnOn();
+        audioSystem.turnOn();
+        audioSystem.setVolume(15);
+    }
+
+    public void turnOffSystem() {
+        System.out.println("Выключение системы.");
+        dvdPlayer.turnOff();
+        gameConsole.turnOff();
+        audioSystem.turnOff();
+        tv.turnOff();
+    }
+}
+
+package Tap;
+
+public class GameConsole {
+    public void turnOn() {
+        System.out.println("Игровая консоль включена.");
+    }
+
+    public void launchGame(String game) {
+        System.out.println("Игра " + game + " запущена.");
+    }
+
+    public void turnOff() {
+        System.out.println("Игровая консоль выключена.");
+    }
+}
+
+package Tap;
+
+public class DVDPlayer {
+    public void turnOn() {
+        System.out.println("DVD-проигрыватель включен.");
+    }
+
+    public void turnOff() {
+        System.out.println("DVD-проигрыватель выключен.");
+    }
+
+    public void play() {
+        System.out.println("Воспроизведение DVD.");
+    }
+
+    public void pause() {
+        System.out.println("DVD на паузе.");
+    }
+
+    public void stop() {
+        System.out.println("Воспроизведение DVD остановлено.");
+    }
+}
+
+package Tap;
+
+public class AudioSystem {
+    public void turnOn() {
+        System.out.println("Аудиосистема включена.");
+    }
+
+    public void turnOff() {
+        System.out.println("Аудиосистема выключена.");
+    }
+
+    public void setVolume(int volume) {
+        System.out.println("Громкость установлена на " + volume);
+    }
+}
 
