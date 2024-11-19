@@ -1,0 +1,143 @@
+package Tap2;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Directory extends FileSystemComponent {
+    private List<FileSystemComponent> components;
+
+    public Directory(String name) {
+        super(name);
+        this.components = new ArrayList<>();
+    }
+
+    @Override
+    public int getSize() {
+        int totalSize = 0;
+        for (FileSystemComponent component : components) {
+            totalSize += component.getSize();
+        }
+        return totalSize;
+    }
+
+    @Override
+    public void display(String indent) {
+        System.out.println(indent + "Папка: " + name + " (Размер: " + getSize() + "KB)");
+        for (FileSystemComponent component : components) {
+            component.display(indent + "    ");
+        }
+    }
+
+    @Override
+    public void add(FileSystemComponent component) {
+        if (!components.contains(component)) {
+            components.add(component);
+        } else {
+            System.out.println("Компонент " + component.getName() + " уже существует в папке " + name);
+        }
+    }
+
+    @Override
+    public void remove(FileSystemComponent component) {
+        if (components.contains(component)) {
+            components.remove(component);
+        } else {
+            System.out.println("Компонент " + component.getName() + " не найден в папке " + name);
+        }
+    }
+
+    @Override
+    public List<FileSystemComponent> getChildren() {
+        return components;
+    }
+}
+
+package Tap2;
+
+public class File extends FileSystemComponent {
+    private int size;
+
+    public File(String name, int size) {
+        super(name);
+        this.size = size;
+    }
+
+    @Override
+    public int getSize() {
+        return size;
+    }
+
+    @Override
+    public void display(String indent) {
+        System.out.println(indent + "Файл: " + name + " (Размер: " + size + "KB)");
+    }
+}
+
+package Tap2;
+
+import java.util.List;
+
+public abstract class FileSystemComponent {
+    protected String name;
+
+    public FileSystemComponent(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public abstract int getSize();
+
+    public abstract void display(String indent);
+
+    public void add(FileSystemComponent component) {
+        throw new UnsupportedOperationException("Операция не поддерживается.");
+    }
+
+    public void remove(FileSystemComponent component) {
+        throw new UnsupportedOperationException("Операция не поддерживается.");
+    }
+
+    public List<FileSystemComponent> getChildren() {
+        throw new UnsupportedOperationException("Операция не поддерживается.");
+    }
+}
+
+package Tap2;
+
+public class Main {
+    public static void main(String[] args) {
+        File file1 = new File("Документ1.txt", 50);
+        File file2 = new File("Изображение1.png", 200);
+        File file3 = new File("Презентация.pptx", 150);
+        File file4 = new File("Скрипт.py", 25);
+
+        Directory root = new Directory("Корень");
+        Directory documents = new Directory("Документы");
+        Directory images = new Directory("Изображения");
+        Directory scripts = new Directory("Скрипты");
+
+        root.add(documents);
+        root.add(images);
+        root.add(scripts);
+
+        documents.add(file1);
+        documents.add(file3);
+
+        images.add(file2);
+
+        scripts.add(file4);
+
+        System.out.println("Содержимое файловой системы:");
+        root.display("");
+
+        System.out.println("\nОбщий размер файловой системы: " + root.getSize() + "KB");
+
+        System.out.println("\nУдаление файла \"Документ1.txt\":");
+        documents.remove(file1);
+        root.display("");
+    }
+}
+
