@@ -1,0 +1,210 @@
+import java.util.List;
+
+public interface ICatalog {
+    List<Book> searchBooks(String query);
+    List<Book> filterBooksByGenre(String genre);
+}
+
+public interface IAccountingSystem {
+    void logLoan(Book book, Reader reader);
+    void logReturn(Book book, Reader reader);
+}
+
+public class Book {
+    private String title;
+    private String author;
+    private String genre;
+    private String isbn;
+    private boolean isAvailable;
+
+    public Book(String title, String author, String genre, String isbn) {
+        this.title = title;
+        this.author = author;
+        this.genre = genre;
+        this.isbn = isbn;
+        this.isAvailable = true;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(boolean available) {
+        isAvailable = available;
+    }
+
+    @Override
+    public String toString() {
+        return title + " by " + author + " (Genre: " + genre + ", ISBN: " + isbn + ", Available: " + isAvailable + ")";
+    }
+}
+
+public class Reader {
+    private String firstName;
+    private String lastName;
+    private String ticketNumber;
+
+    public Reader(String firstName, String lastName, String ticketNumber) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.ticketNumber = ticketNumber;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getTicketNumber() {
+        return ticketNumber;
+    }
+
+    @Override
+    public String toString() {
+        return firstName + " " + lastName + " (Ticket: " + ticketNumber + ")";
+    }
+}
+
+public class Librarian {
+    private ICatalog catalog;
+    private IAccountingSystem accountingSystem;
+
+    public Librarian(ICatalog catalog, IAccountingSystem accountingSystem) {
+        this.catalog = catalog;
+        this.accountingSystem = accountingSystem;
+    }
+
+    public void issueBook(Book book, Reader reader) {
+        if (book.isAvailable()) {
+            book.setAvailable(false);
+            accountingSystem.logLoan(book, reader);
+            System.out.println("Book '" + book.getTitle() + "' issued to " + reader.getFirstName() + " " + reader.getLastName() + ".");
+        } else {
+            System.out.println("Book '" + book.getTitle() + "' is not available.");
+        }
+    }
+
+    public void returnBook(Book book, Reader reader) {
+        book.setAvailable(true);
+        accountingSystem.logReturn(book, reader);
+        System.out.println("Book '" + book.getTitle() + "' returned by " + reader.getFirstName() + " " + reader.getLastName() + ".");
+    }
+}
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class Catalog implements ICatalog {
+    private List<Book> books = new ArrayList<>();
+
+    public void addBook(Book book) {
+        books.add(book);
+    }
+
+    @Override
+    public List<Book> searchBooks(String query) {
+        return books.stream()
+                .filter(b -> b.getTitle().toLowerCase().contains(query.toLowerCase()) ||
+                        b.getAuthor().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Book> filterBooksByGenre(String genre) {
+        return books.stream()
+                .filter(b -> b.getGenre().equalsIgnoreCase(genre))
+                .collect(Collectors.toList());
+    }
+
+    public void displayBooks() {
+        for (Book book : books) {
+            System.out.println(book);
+        }
+    }
+}
+
+public class AccountingSystem implements IAccountingSystem {
+    @Override
+    public void logLoan(Book book, Reader reader) {
+        System.out.println("Loan recorded: " + book.getTitle() + " to " + reader.getFirstName() + " " + reader.getLastName() + ".");
+    }
+
+    @Override
+    public void logReturn(Book book, Reader reader) {
+        System.out.println("Return recorded: " + book.getTitle() + " from " + reader.getFirstName() + " " + reader.getLastName() + ".");
+    }
+}
+
+public class Library {
+    private ICatalog catalog;
+    private Librarian librarian;
+
+    public Library() {
+        IAccountingSystem accountingSystem = new AccountingSystem();
+        catalog = new Catalog();
+        librarian = new Librarian(catalog, accountingSystem);
+    }
+
+    public ICatalog getCatalog() {
+        return catalog;
+    }
+
+    public Librarian getLibrarian() {
+        return librarian;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Library library = new Library();
+
+        // Adding books to the catalog
+        library.getCatalog().addBook(new Book("The Hobbit", "J.R.R. Tolkien", "Fantasy", "123456789"));
+        library.getCatalog().addBook(new Book("1984", "George Orwell", "Dystopian", "987654321"));
+        library.getCatalog().addBook(new Book("To Kill a Mockingbird", "Harper Lee", "Fiction", "112233445"));
+
+        // Display all books
+        System.out.println("All Books:");
+        ((Catalog) library.getCatalog()).displayBooks();
+
+        // Search for a book
+        System.out.println("\nSearch Results:");
+        var searchResults = library.getCatalog().searchBooks("1984");
+        for (Book book : searchResults) {
+            System.out.println(book);
+        }
+
+        // Create a reader
+        Reader reader = new Reader("John", "Doe", "001");
+
+        // Issue a book
+        Book bookToIssue = searchResults.get(0);
+        library.getLibrarian().issueBook(bookToIssue, reader);
+
+        // Attempt to issue the same book again
+        library.getLibrarian().issueBook(bookToIssue, reader);
+
+        // Return the book
+        library.getLibrarian().returnBook(bookToIssue, reader);
+    }
+}
